@@ -1,4 +1,4 @@
-.PHONY: help setup teardown dev backend-install backend-run backend-test backend-lint
+.PHONY: help setup teardown dev backend-install backend-run backend-test backend-test-unit backend-test-int backend-test-e2e backend-lint db-up db-down
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -12,14 +12,29 @@ teardown: ## Destroy local kind cluster
 dev: ## Start Skaffold watch loop (build + deploy on change)
 	skaffold dev --port-forward
 
-backend-install: ## Install backend dependencies (dev mode)
-	cd apps/backend && pip install -e ".[dev]"
+backend-install: ## Create .venv and sync all dependencies via uv
+	cd apps/backend && uv sync --extra dev
 
 backend-run: ## Run backend locally with hot-reload
-	cd apps/backend && uvicorn app.main:app --reload --port 8000
+	cd apps/backend && uv run uvicorn app.main:app --reload --port 8000
 
-backend-test: ## Run backend tests
-	cd apps/backend && pytest
+backend-test: ## Run all backend tests (requires Docker for integration/e2e)
+	cd apps/backend && uv run pytest
+
+backend-test-unit: ## Run unit tests only (no Docker required)
+	cd apps/backend && uv run pytest -m unit
+
+backend-test-int: ## Run integration tests (requires Docker)
+	cd apps/backend && uv run pytest -m integration
+
+backend-test-e2e: ## Run e2e tests (requires Docker)
+	cd apps/backend && uv run pytest -m e2e
 
 backend-lint: ## Lint and format-check backend
-	cd apps/backend && ruff check . && ruff format --check .
+	cd apps/backend && uv run ruff check . && uv run ruff format --check .
+
+db-up: ## Start local PostgreSQL via docker compose
+	cd apps/backend && docker compose up -d db
+
+db-down: ## Stop local PostgreSQL
+	cd apps/backend && docker compose down

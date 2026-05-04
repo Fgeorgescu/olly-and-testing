@@ -1,10 +1,22 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from app.api.v1 import health
+from app.api.v1 import health, holds, items
 from app.core.config import settings
+from app.core.database import engine
 
-app = FastAPI(title=settings.app_name, version=settings.version)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    await engine.dispose()
+
+
+app = FastAPI(title=settings.app_name, version=settings.version, lifespan=lifespan)
 
 Instrumentator().instrument(app).expose(app)
 app.include_router(health.router, prefix="/api/v1")
+app.include_router(items.router, prefix="/api/v1")
+app.include_router(holds.router, prefix="/api/v1")
