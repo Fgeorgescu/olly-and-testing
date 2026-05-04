@@ -3,6 +3,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Stub — swap for a real JWT/session dependency when auth is implemented.
+ANONYMOUS_SELLER_ID = UUID("00000000-0000-0000-0000-000000000001")
+
+
+def get_current_user() -> UUID:
+    return ANONYMOUS_SELLER_ID
+
 from app.core.database import get_db
 from app.repositories.postgres import PostgresItemRepository
 from app.schemas.item import (
@@ -25,8 +32,12 @@ def _item_service(db: AsyncSession = Depends(get_db)) -> ItemService:
 
 
 @router.post("", response_model=ItemResponse, status_code=201)
-async def create_item(body: ItemCreate, svc: ItemService = Depends(_item_service)):
-    return await svc.create(body)
+async def create_item(
+    body: ItemCreate,
+    seller_id: UUID = Depends(get_current_user),
+    svc: ItemService = Depends(_item_service),
+):
+    return await svc.create(body, seller_id)
 
 
 @router.get("", response_model=ItemListResponse)

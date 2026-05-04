@@ -8,12 +8,8 @@ from app.schemas.item import ItemCategory, ItemCreate, ItemStatus
 
 async def _item(item_service, seller=None):
     return await item_service.create(
-        ItemCreate(
-            title="Sofa",
-            description="Comfy",
-            category=ItemCategory.furniture,
-            seller_id=seller or uuid.uuid4(),
-        )
+        ItemCreate(title="Sofa", description="Comfy", category=ItemCategory.furniture),
+        seller or uuid.uuid4(),
     )
 
 

@@ -10,8 +10,8 @@ class ItemService:
     def __init__(self, repo: ItemRepository) -> None:
         self._repo = repo
 
-    async def create(self, data: ItemCreate) -> ItemResponse:
-        return await self._repo.create(data)
+    async def create(self, data: ItemCreate, seller_id: UUID) -> ItemResponse:
+        return await self._repo.create(data, seller_id)
 
     async def get(self, item_id: UUID) -> ItemResponse:
         item = await self._repo.get_by_id(item_id)

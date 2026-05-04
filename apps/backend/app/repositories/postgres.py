@@ -14,13 +14,13 @@ class PostgresItemRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def create(self, data: ItemCreate) -> ItemResponse:
+    async def create(self, data: ItemCreate, seller_id: UUID) -> ItemResponse:
         item = Item(
             title=data.title,
             description=data.description,
             category=data.category.value,
             tags=[t.value for t in data.tags],
-            seller_id=data.seller_id,
+            seller_id=seller_id,
         )
         self._session.add(item)
         await self._session.commit()
