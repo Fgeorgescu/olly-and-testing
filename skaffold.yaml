@@ -1,0 +1,16 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: integrador
+
+build:
+  artifacts:
+  - image: integrador/backend
+    context: apps/backend
+    docker:
+      dockerfile: Dockerfile
+
+deploy:
+  kustomize:
+    paths:
+    - infra/k8s/overlays/local
