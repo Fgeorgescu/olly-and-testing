@@ -13,11 +13,22 @@ make teardown       # Destroy the kind cluster
 
 ### Backend
 ```bash
-make backend-install              # pip install -e ".[dev]" in apps/backend
+make backend-install              # uv sync --extra dev in apps/backend
 make backend-run                  # uvicorn with --reload on port 8000
-make backend-test                 # pytest
+make backend-test                 # pytest (all tiers)
+make backend-test-unit            # pytest -m unit  (no Docker)
+make backend-test-int             # pytest -m integration (testcontainers)
+make backend-test-e2e             # pytest -m e2e (testcontainers + HTTP)
 make backend-lint                 # ruff check + format check
-cd apps/backend && pytest tests/test_health.py   # single test file
+cd apps/backend && uv run pytest tests/test_health.py   # single test file
+```
+
+### Frontend
+```bash
+cd apps/frontend && npm install   # install dependencies
+cd apps/frontend && npm run dev   # Next.js dev server on port 3000
+cd apps/frontend && npm run test:unit   # Vitest unit tests
+cd apps/frontend && npx tsc --noEmit    # type check
 ```
 
 ### Kubernetes
@@ -65,11 +76,12 @@ Significant technical decisions are recorded as ADRs in `docs/adr/`. **Read the 
 | [001](docs/adr/001-backend-language.md) | Backend language: FastAPI (Python) |
 | [002](docs/adr/002-persistence-layer.md) | Persistence: PostgreSQL + SQLAlchemy async + Alembic; `DATABASE_URL` is the only env diff |
 | [003](docs/adr/003-testing-strategy.md) | Testing: unit (no Docker, InMemoryRepository) / integration / e2e (testcontainers); repository pattern as the seam |
+| [004](docs/adr/004-frontend-stack.md) | Frontend: Next.js App Router + TanStack Query + nuqs; Vitest+RTL / MSW / Playwright |
 
 ## Architecture
 
 ### Monorepo layout
-- `apps/` — application code. Currently: `backend/`. Frontend to be added.
+- `apps/` — application code: `backend/` (FastAPI) and `frontend/` (Next.js App Router).
 - `infra/k8s/` — Kustomize manifests. `base/` has the canonical resource definitions; `overlays/local/` patches for local kind dev (image tags, replica counts).
 - `observability/` — Prometheus alerting rules (`prometheus/rules/`) and Grafana dashboard JSON (`grafana/dashboards/`), provisioned automatically into the cluster.
 - `testing/performance/` — k6 scripts. `testing/chaos/` — LitmusChaos experiment manifests.
@@ -82,6 +94,14 @@ FastAPI 0.111+ on Python 3.11. Entry point: `app/main.py`.
 - Prometheus metrics auto-instrumented via `prometheus-fastapi-instrumentator`; exposed at `GET /metrics`.
 - Health endpoint: `GET /api/v1/health` — used by k8s liveness and readiness probes.
 - OpenAPI docs available at `/docs` when running locally.
+
+### Frontend (`apps/frontend/`)
+Next.js 14+ App Router on Node 20+. Entry: `src/app/`.
+- `src/lib/api.ts` — typed API client; all calls go through `api.items.*` and `api.holds.*`; base URL from `NEXT_PUBLIC_API_URL` env var.
+- `src/lib/query-client.tsx` — `Providers` wrapper (TanStack Query + NuqsAdapter); imported once in `src/app/layout.tsx`.
+- All server state in TanStack Query; `useState` only for local UI state. After any mutation call `qc.invalidateQueries({ queryKey: ['items', id] })` to sync the cache.
+- URL search state (query, category, page) managed via nuqs `useQueryState`.
+- Unit tests with Vitest + RTL; setup file at `src/test/setup.ts`.
 
 ### Kubernetes strategy
 Kustomize-based. Base manifests declare resources without environment-specific values. Overlays patch image tags and environment-specific config. `skaffold dev` is the primary local dev loop — it builds the Docker image into the kind cluster and re-deploys on source changes.
