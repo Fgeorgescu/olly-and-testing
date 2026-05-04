@@ -32,6 +32,22 @@ kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
 kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
 ```
 
+## Branching Model
+
+| Branch | Purpose | Base |
+|--------|---------|------|
+| `main` | Production-ready code | — |
+| `develop` | Staging; integration target for features | `main` |
+| `feature/{issue_id}-{feature_name}` | One feature or related set of changes | `develop` |
+
+**Workflow for every feature:**
+1. Check for an existing GitHub issue (`gh issue list --repo Fgeorgescu/integrador`). If none exists, create one with a short title and description (`gh issue create`).
+2. Branch off `develop`: `git checkout -b feature/{issue_id}-{feature_name} develop`
+3. Open a PR targeting `develop` when done.
+4. `develop` is merged into `main` for production releases.
+
+Never commit feature work directly to `main` or `develop`.
+
 ## Skills (Slash Commands)
 
 Project-specific skills live in `.claude/commands/`. See [`.claude/commands/README.md`](.claude/commands/README.md) for the full list and usage.
