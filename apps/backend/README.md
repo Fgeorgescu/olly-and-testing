@@ -10,6 +10,12 @@ FastAPI service providing the core REST API for the Integrador platform.
 - **prometheus-fastapi-instrumentator** — automatic Prometheus metrics
 - **uvicorn** — ASGI server
 
+## Spec-Driven Development
+
+All features are defined in a spec file before any code is written. Specs live in [`specs/features/`](specs/features/) and follow the template in [`specs/_template.md`](specs/_template.md). See [`specs/README.md`](specs/README.md) for the full workflow and lifecycle.
+
+**Rule**: no implementation PR is opened without a spec in `Approved` status.
+
 ## Local Development
 
 ```bash

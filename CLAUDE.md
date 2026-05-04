@@ -40,6 +40,16 @@ Project-specific skills live in `.claude/commands/`. See [`.claude/commands/READ
 |---------|-------------|
 | `/fix-ci` | Diagnoses and fixes the most recent failing CI run, then pushes the fix |
 
+## Architecture Decisions
+
+Significant technical decisions are recorded as ADRs in `docs/adr/`. **Read the relevant ADR before proposing changes to persistence, testing, or infrastructure** — it captures the options that were considered and the reasons for the choice.
+
+| ADR | Decision |
+|-----|----------|
+| [001](docs/adr/001-backend-language.md) | Backend language: FastAPI (Python) |
+| [002](docs/adr/002-persistence-layer.md) | Persistence: PostgreSQL + SQLAlchemy async + Alembic; `DATABASE_URL` is the only env diff |
+| [003](docs/adr/003-testing-strategy.md) | Testing: unit (no Docker, InMemoryRepository) / integration / e2e (testcontainers); repository pattern as the seam |
+
 ## Architecture
 
 ### Monorepo layout
