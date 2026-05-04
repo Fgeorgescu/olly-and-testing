@@ -10,7 +10,7 @@ from app.models.base import Base
 
 config = context.config
 # Only set URL from settings if a caller (e.g. test fixture) hasn't already set it
-if not config.get_main_option("sqlalchemy.url", fallback=None):
+if not config.get_main_option("sqlalchemy.url", default=None):
     config.set_main_option("sqlalchemy.url", settings.database_url)
 
 if config.config_file_name is not None:
