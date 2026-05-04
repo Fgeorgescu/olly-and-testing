@@ -32,6 +32,14 @@ kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
 kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
 ```
 
+## Skills (Slash Commands)
+
+Project-specific skills live in `.claude/commands/`. See [`.claude/commands/README.md`](.claude/commands/README.md) for the full list and usage.
+
+| Command | What it does |
+|---------|-------------|
+| `/fix-ci` | Diagnoses and fixes the most recent failing CI run, then pushes the fix |
+
 ## Architecture
 
 ### Monorepo layout
