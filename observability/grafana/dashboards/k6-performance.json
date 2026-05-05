@@ -1,0 +1,191 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "9.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" }
+  ],
+  "annotations": { "list": [] },
+  "description": "k6 performance test results for the integrador backend",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 20,
+      "title": "Overview",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 20 }, { "color": "red", "value": 50 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "k6_vus", "legendFormat": "VUs", "refId": "A" }],
+      "title": "Active VUs",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 50 }, { "color": "red", "value": 100 }] }, "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "sum(rate(k6_http_reqs_total[1m]))", "legendFormat": "req/s", "refId": "A" }],
+      "title": "Request Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 500 }, { "color": "red", "value": 1000 }] }, "unit": "ms" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "max(k6_http_req_duration_p95)", "legendFormat": "p95", "refId": "A" }],
+      "title": "p95 Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.01 }, { "color": "red", "value": 0.05 }] }, "unit": "percentunit" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "id": 4,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "k6_http_req_failed_rate", "legendFormat": "error rate", "refId": "A" }],
+      "title": "Error Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "decbytes" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "id": 5,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "rate(k6_data_received_total[1m])", "legendFormat": "received/s", "refId": "A" }],
+      "title": "Data Received/s",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "decbytes" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "id": 6,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "rate(k6_data_sent_total[1m])", "legendFormat": "sent/s", "refId": "A" }],
+      "title": "Data Sent/s",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 21,
+      "title": "Latency",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "ms", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "ms" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 6 },
+      "id": 7,
+      "options": { "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "k6_http_req_duration_p50", "legendFormat": "p50 — {{name}}", "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "k6_http_req_duration_p95", "legendFormat": "p95 — {{name}}", "refId": "B" },
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "k6_http_req_duration_p99", "legendFormat": "p99 — {{name}}", "refId": "C" }
+      ],
+      "title": "Response Time by Endpoint (p50 / p95 / p99)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "ms", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "ms" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 6 },
+      "id": 8,
+      "options": { "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "max(k6_http_req_duration_p95)", "legendFormat": "p95 overall", "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "max(k6_http_req_duration_p99)", "legendFormat": "p99 overall", "refId": "B" }
+      ],
+      "title": "Overall p95 / p99 Latency",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
+      "id": 22,
+      "title": "Throughput & Errors",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "req/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 16 },
+      "id": 9,
+      "options": { "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "rate(k6_http_reqs_total[1m])", "legendFormat": "{{name}}", "refId": "A" }
+      ],
+      "title": "Requests/s by Endpoint",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "red" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "error rate", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "percentunit" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 16 },
+      "id": 10,
+      "options": { "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "k6_http_req_failed_rate", "legendFormat": "error rate", "refId": "A" }
+      ],
+      "title": "Error Rate",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
+      "id": 23,
+      "title": "VUs & Iterations",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 26 },
+      "id": 11,
+      "options": { "legend": { "calcs": ["max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "k6_vus", "legendFormat": "VUs", "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "k6_vus_max", "legendFormat": "VUs max", "refId": "B" }
+      ],
+      "title": "Virtual Users",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "iter/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 26 },
+      "id": 12,
+      "options": { "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "integrador-prometheus" }, "expr": "rate(k6_iterations_total[1m])", "legendFormat": "iterations/s", "refId": "A" }
+      ],
+      "title": "Iteration Rate",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "tags": ["integrador", "k6", "performance"],
+  "time": { "from": "now-30m", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "k6 Performance Tests",
+  "uid": "integrador-k6-performance",
+  "version": 2
+}

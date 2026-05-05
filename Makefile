@@ -1,4 +1,4 @@
-.PHONY: help setup teardown dev backend-install backend-run backend-test backend-test-unit backend-test-int backend-test-e2e backend-lint db-up db-down obs-up obs-down
+.PHONY: help setup teardown dev backend-install backend-run backend-test backend-test-unit backend-test-int backend-test-e2e backend-lint db-up db-down obs-up obs-down perf-smoke perf-load perf-stress
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -50,3 +50,18 @@ obs-up: ## Start observability stack. Set PROMETHEUS_URL to use an existing Prom
 
 obs-down: ## Stop observability stack
 	cd observability && docker-compose --profile local-prometheus down
+
+perf-smoke: ## Run smoke test and push results to Prometheus (requires k6 + services running)
+	K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
+	K6_PROMETHEUS_RW_TREND_STATS="p(50),p(95),p(99)" \
+	k6 run --out experimental-prometheus-rw testing/performance/smoke.js
+
+perf-load: ## Run load test and push results to Prometheus
+	K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
+	K6_PROMETHEUS_RW_TREND_STATS="p(50),p(95),p(99)" \
+	k6 run --out experimental-prometheus-rw testing/performance/load.js
+
+perf-stress: ## Run stress test and push results to Prometheus
+	K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
+	K6_PROMETHEUS_RW_TREND_STATS="p(50),p(95),p(99)" \
+	k6 run --out experimental-prometheus-rw testing/performance/stress.js
