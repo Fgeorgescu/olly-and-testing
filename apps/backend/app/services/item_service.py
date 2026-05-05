@@ -14,8 +14,8 @@ class ItemService:
     def __init__(self, repo: ItemRepository) -> None:
         self._repo = repo
 
-    async def create(self, data: ItemCreate) -> ItemResponse:
-        item = await self._repo.create(data)
+    async def create(self, data: ItemCreate, seller_id: UUID) -> ItemResponse:
+        item = await self._repo.create(data, seller_id)
         item_events.labels(event="created", actor="").inc()
         logger.info(
             "item lifecycle", extra={"event": "created", "item_id": str(item.id)}

@@ -6,12 +6,11 @@ from app.repositories.postgres import PostgresHoldRepository, PostgresItemReposi
 from app.schemas.item import ItemCategory, ItemCreate, ItemStatus, ItemTag, ItemUpdate
 
 
-def _item(title, description, category, seller_id=None, tags=None):
+def _item(title, description, category, tags=None):
     return ItemCreate(
         title=title,
         description=description,
         category=category,
-        seller_id=seller_id or uuid.uuid4(),
         tags=tags or [],
     )
 
@@ -25,7 +24,7 @@ async def test_create_and_get_item(db_session):
         ItemCategory.electronics,
         tags=[ItemTag.used, ItemTag.negotiable],
     )
-    created = await repo.create(data)
+    created = await repo.create(data, uuid.uuid4())
     assert created.id is not None
     assert created.status == ItemStatus.available
 
@@ -38,7 +37,9 @@ async def test_create_and_get_item(db_session):
 @pytest.mark.integration
 async def test_update_item(db_session):
     repo = PostgresItemRepository(db_session)
-    item = await repo.create(_item("Monitor", "4K", ItemCategory.electronics))
+    item = await repo.create(
+        _item("Monitor", "4K", ItemCategory.electronics), uuid.uuid4()
+    )
     updated = await repo.update(item.id, ItemUpdate(title="4K Monitor"))
     assert updated.title == "4K Monitor"
 
@@ -46,7 +47,9 @@ async def test_update_item(db_session):
 @pytest.mark.integration
 async def test_update_status(db_session):
     repo = PostgresItemRepository(db_session)
-    item = await repo.create(_item("Desk", "Wooden", ItemCategory.furniture))
+    item = await repo.create(
+        _item("Desk", "Wooden", ItemCategory.furniture), uuid.uuid4()
+    )
     updated = await repo.update_status(item.id, ItemStatus.on_hold)
     assert updated.status == ItemStatus.on_hold
 
@@ -54,7 +57,7 @@ async def test_update_status(db_session):
 @pytest.mark.integration
 async def test_delete_item(db_session):
     repo = PostgresItemRepository(db_session)
-    item = await repo.create(_item("Lamp", "LED", ItemCategory.furniture))
+    item = await repo.create(_item("Lamp", "LED", ItemCategory.furniture), uuid.uuid4())
     deleted = await repo.delete(item.id)
     assert deleted is True
     assert await repo.get_by_id(item.id) is None
@@ -65,7 +68,9 @@ async def test_hold_lifecycle(db_session):
     item_repo = PostgresItemRepository(db_session)
     hold_repo = PostgresHoldRepository(db_session)
 
-    item = await item_repo.create(_item("Sofa", "Comfy", ItemCategory.furniture))
+    item = await item_repo.create(
+        _item("Sofa", "Comfy", ItemCategory.furniture), uuid.uuid4()
+    )
     buyer = uuid.uuid4()
 
     hold = await hold_repo.create(item.id, buyer)

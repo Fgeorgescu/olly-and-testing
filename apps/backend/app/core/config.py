@@ -9,6 +9,7 @@ class Settings(BaseSettings):
         "postgresql+asyncpg://integrador:integrador@localhost:5432/integrador"
     )
     search_backend: str = "simple"
+    cors_origins: list[str] = ["http://localhost:3000"]
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

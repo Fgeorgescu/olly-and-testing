@@ -106,7 +106,7 @@ class ItemResponse(BaseModel):
 
 ### Integrations
 
-- **Auth module** (future): seller identity is taken from the authenticated user. Until auth is implemented, `seller_id` is accepted as a request field.
+- **Auth module** (future): `seller_id` is taken from the authenticated user's identity — it is never part of the request body. Until auth is implemented, a fixed placeholder UUID (`00000000-0000-0000-0000-000000000001`) is injected server-side via a stub `get_current_user` dependency in `app/api/v1/items.py`.
 - **Purchase-hold feature**: controls status transitions; this feature must not change status directly.
 
 ### Non-Functional Requirements

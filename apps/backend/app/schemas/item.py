@@ -35,7 +35,6 @@ class ItemCreate(BaseModel):
     description: str = Field(max_length=2000)
     category: ItemCategory
     tags: list[ItemTag] = []
-    seller_id: UUID  # replaced by auth token once auth is implemented
 
 
 class ItemUpdate(BaseModel):
