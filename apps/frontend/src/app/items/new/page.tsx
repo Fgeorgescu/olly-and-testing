@@ -26,14 +26,12 @@ interface FormValues {
   description: string;
   category: ItemCategory | "";
   tags: ItemTag[];
-  seller_id: string;
 }
 
 interface FormErrors {
   title?: string;
   description?: string;
   category?: string;
-  seller_id?: string;
 }
 
 function validate(values: FormValues): FormErrors {
@@ -44,13 +42,6 @@ function validate(values: FormValues): FormErrors {
   else if (values.description.length > 2000)
     errors.description = "Max 2000 characters";
   if (!values.category) errors.category = "Category is required";
-  if (!values.seller_id.trim()) errors.seller_id = "Seller ID is required";
-  else if (
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      values.seller_id,
-    )
-  )
-    errors.seller_id = "Must be a valid UUID";
   return errors;
 }
 
@@ -63,7 +54,6 @@ export default function PostItemPage() {
     description: "",
     category: "",
     tags: [],
-    seller_id: "",
   });
   const [touched, setTouched] = useState<Partial<Record<keyof FormValues, boolean>>>({});
   const errors = validate(values);
@@ -109,7 +99,7 @@ export default function PostItemPage() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          setTouched({ title: true, description: true, category: true, seller_id: true });
+          setTouched({ title: true, description: true, category: true });
           if (!hasErrors) mutation.mutate();
         }}
         className="space-y-4"
@@ -187,21 +177,6 @@ export default function PostItemPage() {
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Seller ID */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Seller ID</label>
-          <input
-            value={values.seller_id}
-            onChange={(e) => setValues((v) => ({ ...v, seller_id: e.target.value }))}
-            {...field("seller_id")}
-            className="w-full border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-          />
-          {touched.seller_id && errors.seller_id && (
-            <p className="mt-1 text-xs text-red-500">{errors.seller_id}</p>
-          )}
         </div>
 
         {mutation.isError && (

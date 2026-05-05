@@ -1,40 +1,41 @@
 # Backend
 
-FastAPI service providing the core REST API for the Integrador platform.
+FastAPI service providing the core REST API for the Integrador marketplace.
 
 ## Stack
 
-- **Python 3.11**
-- **FastAPI 0.111+** — REST framework with automatic OpenAPI docs
-- **pydantic-settings** — environment-based configuration
-- **prometheus-fastapi-instrumentator** — automatic Prometheus metrics
-- **uvicorn** — ASGI server
-
-## Spec-Driven Development
-
-All features are defined in a spec file before any code is written. Specs live in [`specs/features/`](specs/features/) and follow the template in [`specs/_template.md`](specs/_template.md). See [`specs/README.md`](specs/README.md) for the full workflow and lifecycle.
-
-**Rule**: no implementation PR is opened without a spec in `Approved` status.
+| Library | Purpose |
+|---------|---------|
+| Python 3.11 | Runtime |
+| FastAPI 0.111+ | REST framework, OpenAPI docs |
+| SQLAlchemy 2 async + asyncpg | PostgreSQL ORM |
+| Alembic | Database migrations |
+| pydantic-settings | Environment-based configuration |
+| prometheus-fastapi-instrumentator | Automatic HTTP metrics |
+| prometheus-client | Custom lifecycle counters |
+| python-json-logger | Structured JSON logging |
+| uv | Dependency management |
 
 ## Local Development
 
 ```bash
-# Install dependencies (from this directory)
-pip install -e ".[dev]"
+# From the repo root — starts everything
+make setup
 
-# Run with hot-reload
-uvicorn app.main:app --reload --port 8000
+# Or run the backend alone (PostgreSQL must be up)
+make db-up
+make backend-run   # hot-reload on http://localhost:8000
 ```
 
-API is available at `http://localhost:8000`.
-Interactive docs at `http://localhost:8000/docs`.
+Interactive docs: http://localhost:8000/docs
 
 ## Environment Variables
 
-All config is loaded from environment variables or a `.env` file in this directory.
+Loaded from environment or a `.env` file in `apps/backend/`.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `DATABASE_URL` | `postgresql+asyncpg://...` | PostgreSQL connection string |
 | `APP_NAME` | `integrador-backend` | Application name |
 | `VERSION` | `0.1.0` | API version |
 | `ENVIRONMENT` | `development` | Runtime environment |
@@ -45,40 +46,49 @@ All config is loaded from environment variables or a `.env` file in this directo
 |--------|------|-------------|
 | `GET` | `/api/v1/health` | Liveness/readiness check |
 | `GET` | `/metrics` | Prometheus metrics scrape endpoint |
-| `GET` | `/docs` | Swagger UI (development only) |
+| `POST` | `/api/v1/items` | Create a listing |
+| `GET` | `/api/v1/items` | Search/list items |
+| `GET` | `/api/v1/items/{id}` | Get item detail |
+| `PUT` | `/api/v1/items/{id}` | Update item |
+| `DELETE` | `/api/v1/items/{id}` | Delete item |
+| `POST` | `/api/v1/items/{id}/hold` | Place a purchase hold |
+| `DELETE` | `/api/v1/items/{id}/hold` | Release a hold |
+| `POST` | `/api/v1/items/{id}/confirm` | Confirm purchase (buyer or seller) |
 
 ## Testing
 
+Tests are split into three tiers (see [ADR-003](../../docs/adr/003-testing-strategy.md)):
+
 ```bash
-# Run all tests
-pytest
-
-# Run a single file
-pytest tests/test_health.py
-
-# Run with output
-pytest -s
+make backend-test-unit   # unit — no Docker, in-memory repo, fast
+make backend-test-int    # integration — requires Docker (testcontainers)
+make backend-test-e2e    # e2e — requires Docker (testcontainers), full HTTP stack
+make backend-test        # all tiers
 ```
+
+CI enforces an 80% coverage gate on the unit tier and posts a coverage comment on every PR.
+
+## Observability
+
+The backend emits two kinds of signals:
+
+**Metrics** (`/metrics` — Prometheus format):
+- HTTP request metrics auto-instrumented by `prometheus-fastapi-instrumentator`
+- `item_events_total{event, actor}` — lifecycle counter incremented on every state transition (created, deleted, on_hold, hold_released, confirmed, sold)
+
+**Logs** (`logs/app.log` — JSON, scraped by Promtail → Loki):
+- Console output: human-readable `HH:MM:SS  LEVEL  event  item_id  actor=…`
+- File output: structured JSON with `timestamp`, `level`, `logger`, `event`, `item_id`, `actor`
+
+See [observability/README.md](../../observability/README.md) for the Grafana dashboard.
+
+## Spec-Driven Development
+
+All features start with a spec file in [`specs/features/`](specs/features/) following the template in [`specs/_template.md`](specs/_template.md). No implementation PR is opened without a spec in `Approved` status.
 
 ## Linting
 
 ```bash
-ruff check .          # lint
-ruff format --check . # format check
-ruff format .         # auto-format
+make backend-lint          # ruff check + format check
+cd apps/backend && uv run ruff format .   # auto-format
 ```
-
-## Docker
-
-```bash
-# Build image
-docker build -t integrador/backend:latest .
-
-# Run container
-docker run -p 8000:8000 integrador/backend:latest
-```
-
-## Deployment
-
-For Kubernetes deployment, see [infra/k8s/README.md](../../infra/k8s/README.md).
-The backend is deployed as a `Deployment` with liveness and readiness probes pointing at `/api/v1/health`, and Prometheus scraping enabled via pod annotations.
