@@ -121,7 +121,26 @@ class ItemResponse(BaseModel):
 
 ---
 
-## 4. Out of Scope
+## 4. Observability
+
+### Metrics
+
+| Metric | Type | Labels | Emitted when |
+|--------|------|--------|--------------|
+| `item_events_total` | Counter | `event: created` | `POST /api/v1/items` succeeds |
+| `item_events_total` | Counter | `event: deleted` | `DELETE /api/v1/items/{id}` succeeds |
+
+### Dashboards
+
+- **Item Lifecycle Events** — panels showing rate of items created and deleted over time.
+
+### Alerts
+
+- Alert if `rate(item_events_total{event="created"}[5m]) == 0` for an extended window during expected high-traffic hours (indicates a potential ingestion problem).
+
+---
+
+## 5. Out of Scope
 
 - Image uploads
 - Listing expiry / auto-archival
@@ -130,7 +149,7 @@ class ItemResponse(BaseModel):
 
 ---
 
-## 5. Open Questions
+## 6. Open Questions
 
 | # | Question | Owner | Resolution |
 |---|----------|-------|------------|

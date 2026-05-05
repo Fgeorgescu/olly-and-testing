@@ -144,7 +144,26 @@ Item data is fetched on mount and stored locally in the page component. After an
 
 ---
 
-## 5. Out of Scope
+## 5. Observability
+
+### User Interactions to Track
+
+| Interaction | Suggested event name | Notes |
+|-------------|---------------------|-------|
+| "Purchase" button clicked | `item_hold_initiated` | Include `item_id` |
+| Hold placed successfully | `item_hold_placed` | Include `item_id` |
+| "Confirm purchase" clicked | `item_confirm_clicked` | Include `item_id`, `role: buyer\|seller` |
+| Confirm successful | `item_confirm_success` | Include `item_id`, `role` |
+| "Release hold" clicked | `item_hold_release_clicked` | Include `item_id`, `role: buyer\|seller` |
+| Release successful | `item_hold_released` | Include `item_id` |
+
+### Error Monitoring
+
+- API errors (5xx) on hold placement, confirm, and release actions should be forwarded to the error tracker with `item_id` and the action attempted.
+
+---
+
+## 6. Out of Scope
 
 - Real-time status updates (WebSocket / SSE); user refreshes to see latest state
 - In-platform messaging
@@ -153,7 +172,7 @@ Item data is fetched on mount and stored locally in the page component. After an
 
 ---
 
-## 6. Open Questions
+## 7. Open Questions
 
 | # | Question | Owner | Resolution |
 |---|----------|-------|------------|

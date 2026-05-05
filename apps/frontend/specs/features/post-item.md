@@ -103,7 +103,24 @@ Form state is local to `PostItemForm`. No global state is needed. On `201` the r
 
 ---
 
-## 5. Out of Scope
+## 5. Observability
+
+### User Interactions to Track
+
+| Interaction | Suggested event name | Notes |
+|-------------|---------------------|-------|
+| Form submitted (valid) | `post_item_submitted` | — |
+| Validation error shown | `post_item_validation_error` | Include `field` as property |
+| API error received | `post_item_api_error` | Include HTTP status |
+| Redirect to detail page | `post_item_success` | — |
+
+### Error Monitoring
+
+- API errors (5xx) on form submission should be forwarded to the error tracker with the request payload (excluding any PII fields).
+
+---
+
+## 6. Out of Scope
 
 - Image uploads
 - Draft saving / auto-save
@@ -111,7 +128,7 @@ Form state is local to `PostItemForm`. No global state is needed. On `201` the r
 
 ---
 
-## 6. Open Questions
+## 7. Open Questions
 
 | # | Question | Owner | Resolution |
 |---|----------|-------|------------|

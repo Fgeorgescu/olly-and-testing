@@ -90,14 +90,32 @@ Describe how data flows through the page: what is fetched, what is stored locall
 
 ---
 
-## 5. Out of Scope
+## 5. Observability
+
+### User Interactions to Track
+
+List UI events worth instrumenting when analytics or RUM (Real User Monitoring) is added. These are not implemented now but naming them here prevents them from being forgotten.
+
+| Interaction | Suggested event name | Notes |
+|-------------|---------------------|-------|
+| Example button click | `example_button_clicked` | Include relevant context as properties |
+
+### Error Monitoring
+
+List the error scenarios that should be forwarded to an error tracker (e.g. Sentry) when one is integrated:
+
+- Unexpected API errors (non-4xx) during user-initiated actions
+
+---
+
+## 6. Out of Scope
 
 - Item 1
 - Item 2
 
 ---
 
-## 6. Open Questions
+## 7. Open Questions
 
 | # | Question | Owner | Resolution |
 |---|----------|-------|------------|
