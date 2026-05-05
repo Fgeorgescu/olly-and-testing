@@ -45,7 +45,12 @@ async def test_hold_and_dual_confirm(client):
 
     create = await client.post(
         "/api/v1/items",
-        json={"title": "Guitar", "description": "Acoustic", "category": "other", "tags": []},
+        json={
+            "title": "Guitar",
+            "description": "Acoustic",
+            "category": "other",
+            "tags": [],
+        },
     )
     item_id = create.json()["id"]
     seller = create.json()["seller_id"]  # set by the server (current user)
@@ -71,7 +76,12 @@ async def test_release_hold(client):
 
     create = await client.post(
         "/api/v1/items",
-        json={"title": "Scooter", "description": "Electric", "category": "vehicles", "tags": []},
+        json={
+            "title": "Scooter",
+            "description": "Electric",
+            "category": "vehicles",
+            "tags": [],
+        },
     )
     item_id = create.json()["id"]
 

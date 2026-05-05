@@ -37,7 +37,9 @@ async def test_create_and_get_item(db_session):
 @pytest.mark.integration
 async def test_update_item(db_session):
     repo = PostgresItemRepository(db_session)
-    item = await repo.create(_item("Monitor", "4K", ItemCategory.electronics), uuid.uuid4())
+    item = await repo.create(
+        _item("Monitor", "4K", ItemCategory.electronics), uuid.uuid4()
+    )
     updated = await repo.update(item.id, ItemUpdate(title="4K Monitor"))
     assert updated.title == "4K Monitor"
 
@@ -45,7 +47,9 @@ async def test_update_item(db_session):
 @pytest.mark.integration
 async def test_update_status(db_session):
     repo = PostgresItemRepository(db_session)
-    item = await repo.create(_item("Desk", "Wooden", ItemCategory.furniture), uuid.uuid4())
+    item = await repo.create(
+        _item("Desk", "Wooden", ItemCategory.furniture), uuid.uuid4()
+    )
     updated = await repo.update_status(item.id, ItemStatus.on_hold)
     assert updated.status == ItemStatus.on_hold
 
@@ -64,7 +68,9 @@ async def test_hold_lifecycle(db_session):
     item_repo = PostgresItemRepository(db_session)
     hold_repo = PostgresHoldRepository(db_session)
 
-    item = await item_repo.create(_item("Sofa", "Comfy", ItemCategory.furniture), uuid.uuid4())
+    item = await item_repo.create(
+        _item("Sofa", "Comfy", ItemCategory.furniture), uuid.uuid4()
+    )
     buyer = uuid.uuid4()
 
     hold = await hold_repo.create(item.id, buyer)

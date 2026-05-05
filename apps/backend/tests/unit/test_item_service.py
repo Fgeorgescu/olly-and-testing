@@ -42,7 +42,9 @@ async def test_get_item_not_found(item_service):
 async def test_update_item(item_service):
     seller = uuid.uuid4()
     item = await item_service.create(
-        ItemCreate(title="Chair", description="Wooden", category=ItemCategory.furniture),
+        ItemCreate(
+            title="Chair", description="Wooden", category=ItemCategory.furniture
+        ),
         seller,
     )
     updated = await item_service.update(item.id, ItemUpdate(title="Oak Chair"), seller)
@@ -55,7 +57,9 @@ async def test_update_item_wrong_owner(item_service):
 
     seller = uuid.uuid4()
     item = await item_service.create(
-        ItemCreate(title="Chair", description="Wooden", category=ItemCategory.furniture),
+        ItemCreate(
+            title="Chair", description="Wooden", category=ItemCategory.furniture
+        ),
         seller,
     )
     with pytest.raises(HTTPException) as exc:
