@@ -3,8 +3,10 @@
   "__requires": [
     { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "9.0.0" },
     { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" },
+    { "type": "datasource", "id": "loki", "name": "Loki", "version": "1.0.0" },
     { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
-    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" }
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
+    { "type": "panel", "id": "logs", "name": "Logs", "version": "" }
   ],
   "annotations": { "list": [] },
   "description": "Item lifecycle event counters for the integrador backend",
@@ -161,6 +163,38 @@
       "type": "row"
     },
     {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "id": 12,
+      "title": "Logs",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "integrador-loki" },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 19 },
+      "id": 6,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "integrador-loki" },
+          "expr": "{job=\"integrador-backend\"}",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Item Lifecycle Logs",
+      "type": "logs"
+    },
+    {
       "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
       "fieldConfig": {
         "defaults": {
@@ -247,5 +281,5 @@
   "timezone": "browser",
   "title": "Item Lifecycle Events",
   "uid": "integrador-item-lifecycle",
-  "version": 1
+  "version": 2
 }

@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -11,6 +12,8 @@ from app.schemas.hold import (
     SellerContact,
 )
 from app.schemas.item import ItemStatus
+
+logger = logging.getLogger(__name__)
 
 
 class HoldService:
@@ -35,6 +38,10 @@ class HoldService:
             email=f"{item.seller_id}@placeholder.local",
         )
         item_events.labels(event="on_hold", actor="").inc()
+        logger.info(
+            "item lifecycle",
+            extra={"event": "on_hold", "item_id": str(item_id), "actor": str(buyer_id)},
+        )
         return hold
 
     async def get_contact(self, item_id: UUID, caller_id: UUID) -> SellerContact:
@@ -64,6 +71,10 @@ class HoldService:
         await self._holds.release(item_id)
         updated = await self._items.update_status(item_id, ItemStatus.available)
         item_events.labels(event="hold_released", actor=actor).inc()
+        logger.info(
+            "item lifecycle",
+            extra={"event": "hold_released", "item_id": str(item_id), "actor": actor},
+        )
         return HoldReleaseResponse(item_id=item_id, status=updated.status)  # type: ignore[union-attr]
 
     async def confirm(self, item_id: UUID, confirmer_id: UUID) -> ConfirmResponse:
@@ -90,12 +101,19 @@ class HoldService:
 
         updated_hold = await self._holds.confirm(item_id, role)
         item_events.labels(event="confirmed", actor=role).inc()
+        logger.info(
+            "item lifecycle",
+            extra={"event": "confirmed", "item_id": str(item_id), "actor": role},
+        )
 
         final_status = ItemStatus.on_hold
         if updated_hold.buyer_confirmed and updated_hold.seller_confirmed:
             await self._items.update_status(item_id, ItemStatus.sold)
             final_status = ItemStatus.sold
             item_events.labels(event="sold", actor="").inc()
+            logger.info(
+                "item lifecycle", extra={"event": "sold", "item_id": str(item_id)}
+            )
 
         return ConfirmResponse(
             item_id=item_id,

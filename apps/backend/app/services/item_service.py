@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -5,6 +6,8 @@ from fastapi import HTTPException
 from app.core.metrics import item_events
 from app.repositories.protocols import ItemRepository
 from app.schemas.item import ItemCreate, ItemResponse, ItemStatus, ItemUpdate
+
+logger = logging.getLogger(__name__)
 
 
 class ItemService:
@@ -14,6 +17,9 @@ class ItemService:
     async def create(self, data: ItemCreate) -> ItemResponse:
         item = await self._repo.create(data)
         item_events.labels(event="created", actor="").inc()
+        logger.info(
+            "item lifecycle", extra={"event": "created", "item_id": str(item.id)}
+        )
         return item
 
     async def get(self, item_id: UUID) -> ItemResponse:
@@ -45,3 +51,6 @@ class ItemService:
             )
         await self._repo.delete(item_id)
         item_events.labels(event="deleted", actor="").inc()
+        logger.info(
+            "item lifecycle", extra={"event": "deleted", "item_id": str(item_id)}
+        )
