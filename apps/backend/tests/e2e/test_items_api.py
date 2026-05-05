@@ -1,11 +1,8 @@
-import uuid
-
 import pytest
 
 
 @pytest.mark.e2e
 async def test_create_and_get_item(client):
-    seller = str(uuid.uuid4())
     resp = await client.post(
         "/api/v1/items",
         json={
@@ -13,7 +10,6 @@ async def test_create_and_get_item(client):
             "description": "DSLR, great condition",
             "category": "electronics",
             "tags": ["used"],
-            "seller_id": seller,
         },
     )
     assert resp.status_code == 201
@@ -27,7 +23,6 @@ async def test_create_and_get_item(client):
 
 @pytest.mark.e2e
 async def test_search_returns_item(client):
-    seller = str(uuid.uuid4())
     await client.post(
         "/api/v1/items",
         json={
@@ -35,7 +30,6 @@ async def test_search_returns_item(client):
             "description": "Art deco style",
             "category": "furniture",
             "tags": [],
-            "seller_id": seller,
         },
     )
     resp = await client.get("/api/v1/items?q=vintage")
@@ -47,8 +41,7 @@ async def test_search_returns_item(client):
 
 @pytest.mark.e2e
 async def test_hold_and_dual_confirm(client):
-    seller = str(uuid.uuid4())
-    buyer = str(uuid.uuid4())
+    buyer = "00000000-0000-0000-0000-000000000002"
 
     create = await client.post(
         "/api/v1/items",
@@ -57,10 +50,10 @@ async def test_hold_and_dual_confirm(client):
             "description": "Acoustic",
             "category": "other",
             "tags": [],
-            "seller_id": seller,
         },
     )
     item_id = create.json()["id"]
+    seller = create.json()["seller_id"]  # set by the server (current user)
 
     hold = await client.post(f"/api/v1/items/{item_id}/hold", json={"buyer_id": buyer})
     assert hold.status_code == 201
@@ -79,8 +72,7 @@ async def test_hold_and_dual_confirm(client):
 
 @pytest.mark.e2e
 async def test_release_hold(client):
-    seller = str(uuid.uuid4())
-    buyer = str(uuid.uuid4())
+    buyer = "00000000-0000-0000-0000-000000000002"
 
     create = await client.post(
         "/api/v1/items",
@@ -89,7 +81,6 @@ async def test_release_hold(client):
             "description": "Electric",
             "category": "vehicles",
             "tags": [],
-            "seller_id": seller,
         },
     )
     item_id = create.json()["id"]

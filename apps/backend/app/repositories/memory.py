@@ -11,7 +11,7 @@ class InMemoryItemRepository:
     def __init__(self) -> None:
         self._store: dict[UUID, ItemResponse] = {}
 
-    async def create(self, data: ItemCreate) -> ItemResponse:
+    async def create(self, data: ItemCreate, seller_id: UUID) -> ItemResponse:
         now = datetime.now(timezone.utc)
         item = ItemResponse(
             id=uuid.uuid4(),
@@ -20,7 +20,7 @@ class InMemoryItemRepository:
             category=data.category,
             status=ItemStatus.available,
             tags=data.tags,
-            seller_id=data.seller_id,
+            seller_id=seller_id,
             created_at=now,
             updated_at=now,
         )
