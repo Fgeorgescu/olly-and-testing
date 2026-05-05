@@ -1,33 +1,51 @@
 # Frontend
 
-> **Status: planned — not yet implemented.**
+Next.js marketplace UI for the Integrador platform.
 
-The frontend will be a Next.js web application served within the local kind cluster and consuming the [Backend API](../backend/README.md).
+## Stack
 
-## Planned Stack
+| Library | Purpose |
+|---------|---------|
+| Next.js 15 (App Router) | React framework |
+| TypeScript | Type safety |
+| Tailwind CSS | Styling |
+| TanStack Query | Server state, caching |
+| Vitest + Testing Library | Unit tests |
 
-- **Next.js 14+** (App Router)
-- **TypeScript**
-- **Tailwind CSS**
-
-## Planned Local Development
+## Local Development
 
 ```bash
-# From this directory
-npm install
-npm run dev     # http://localhost:3000
+# From the repo root — starts everything
+make setup
+
+# Or run the frontend alone (backend must be up)
+cd apps/frontend && npm run dev   # http://localhost:3000
 ```
+
+## Pages
+
+| Route | Description |
+|-------|-------------|
+| `/` | Home — search and browse listings |
+| `/items/[id]` | Item detail — hold, confirm, release |
+| `/items/new` | Post a new listing |
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Backend base URL |
 
 ## Backend Connection
 
-The frontend will communicate with the backend via the Kubernetes service name `backend:8000` inside the cluster, and via `http://localhost:8000` in local dev (port-forwarded).
+The frontend talks to the backend via `NEXT_PUBLIC_API_URL`. All API calls are defined in [`src/lib/api.ts`](src/lib/api.ts).
 
-The base URL will be configured through an environment variable:
+Authentication is not yet implemented. The backend injects a fixed anonymous seller ID server-side for all item creation requests.
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
+## Testing
+
+```bash
+cd apps/frontend
+npm test          # run Vitest unit tests
+npm run build     # type-check + production build
 ```
-
-## Deployment
-
-Will follow the same Kustomize + Skaffold pattern as the backend. See [infra/k8s/README.md](../../infra/k8s/README.md).

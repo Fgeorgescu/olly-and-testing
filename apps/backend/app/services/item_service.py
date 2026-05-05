@@ -1,17 +1,26 @@
+import logging
 from uuid import UUID
 
 from fastapi import HTTPException
 
+from app.core.metrics import item_events
 from app.repositories.protocols import ItemRepository
 from app.schemas.item import ItemCreate, ItemResponse, ItemStatus, ItemUpdate
+
+logger = logging.getLogger(__name__)
 
 
 class ItemService:
     def __init__(self, repo: ItemRepository) -> None:
         self._repo = repo
 
-    async def create(self, data: ItemCreate) -> ItemResponse:
-        return await self._repo.create(data)
+    async def create(self, data: ItemCreate, seller_id: UUID) -> ItemResponse:
+        item = await self._repo.create(data, seller_id)
+        item_events.labels(event="created", actor="").inc()
+        logger.info(
+            "item lifecycle", extra={"event": "created", "item_id": str(item.id)}
+        )
+        return item
 
     async def get(self, item_id: UUID) -> ItemResponse:
         item = await self._repo.get_by_id(item_id)
@@ -41,3 +50,7 @@ class ItemService:
                 status_code=409, detail="Release the hold before deleting"
             )
         await self._repo.delete(item_id)
+        item_events.labels(event="deleted", actor="").inc()
+        logger.info(
+            "item lifecycle", extra={"event": "deleted", "item_id": str(item_id)}
+        )

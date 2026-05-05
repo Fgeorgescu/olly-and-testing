@@ -63,7 +63,29 @@ class ExampleRequest(BaseModel):
 
 ---
 
-## 4. Out of Scope
+## 4. Observability
+
+### Metrics
+
+List every Prometheus metric this feature must emit. Every new endpoint or state transition that matters operationally needs a metric here before implementation begins.
+
+| Metric | Type | Labels | Emitted when |
+|--------|------|--------|--------------|
+| `example_events_total` | Counter | `event: created\|updated\|deleted` | State transition occurs |
+
+### Dashboards
+
+- List the Grafana panel(s) or dashboard(s) this feature's metrics should appear in.
+- If no dashboard exists yet, note the one that should be created.
+
+### Alerts
+
+- List alerting rules that should fire on anomalies in these metrics (e.g. sudden drop to zero, error-rate spike).
+- Leave empty if no alert is warranted at this stage.
+
+---
+
+## 5. Out of Scope
 
 List anything explicitly excluded from this spec to avoid scope creep.
 
@@ -72,7 +94,7 @@ List anything explicitly excluded from this spec to avoid scope creep.
 
 ---
 
-## 5. Open Questions
+## 6. Open Questions
 
 | # | Question | Owner | Resolution |
 |---|----------|-------|------------|
