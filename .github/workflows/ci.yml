@@ -1,4 +1,8 @@
 name: CI
+# PR convention: include "Closes #<issue-number>" in the PR description.
+# GitHub will automatically close the linked issue when the PR is merged into
+# the default branch (main). For feature PRs targeting develop, the issue
+# closes when develop is later merged into main.
 
 on:
   push:
