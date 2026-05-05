@@ -1,0 +1,251 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "9.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" }
+  ],
+  "annotations": { "list": [] },
+  "description": "Item lifecycle event counters for the integrador backend",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 10,
+      "title": "Totals",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(item_events_total{event=\"created\"}) or vector(0)",
+          "instant": true,
+          "legendFormat": "Created",
+          "refId": "A"
+        }
+      ],
+      "title": "Items Created",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(item_events_total{event=\"deleted\"}) or vector(0)",
+          "instant": true,
+          "legendFormat": "Deleted",
+          "refId": "A"
+        }
+      ],
+      "title": "Items Deleted",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(item_events_total{event=\"on_hold\"}) or vector(0)",
+          "instant": true,
+          "legendFormat": "On Hold",
+          "refId": "A"
+        }
+      ],
+      "title": "Items On Hold",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 1 },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(item_events_total{event=\"sold\"}) or vector(0)",
+          "instant": true,
+          "legendFormat": "Sold",
+          "refId": "A"
+        }
+      ],
+      "title": "Items Sold",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+      "id": 11,
+      "title": "Event Rates",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "events / min",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(rate(item_events_total{event=\"created\"}[5m])) * 60",
+          "legendFormat": "created",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(rate(item_events_total{event=\"deleted\"}[5m])) * 60",
+          "legendFormat": "deleted",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(rate(item_events_total{event=\"on_hold\"}[5m])) * 60",
+          "legendFormat": "on_hold",
+          "refId": "C"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(rate(item_events_total{event=\"hold_released\"}[5m])) * 60",
+          "legendFormat": "hold_released",
+          "refId": "D"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(rate(item_events_total{event=\"confirmed\"}[5m])) * 60",
+          "legendFormat": "confirmed",
+          "refId": "E"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "integrador-prometheus" },
+          "expr": "sum(rate(item_events_total{event=\"sold\"}[5m])) * 60",
+          "legendFormat": "sold",
+          "refId": "F"
+        }
+      ],
+      "title": "Event Rates (per minute)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["integrador", "items", "lifecycle"],
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Item Lifecycle Events",
+  "uid": "integrador-item-lifecycle",
+  "version": 1
+}

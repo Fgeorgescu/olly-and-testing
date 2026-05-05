@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import HTTPException
 
+from app.core.metrics import item_events
 from app.repositories.protocols import HoldRepository, ItemRepository
 from app.schemas.hold import (
     ConfirmResponse,
@@ -33,6 +34,7 @@ class HoldService:
             display_name=str(item.seller_id),  # placeholder until user model exists
             email=f"{item.seller_id}@placeholder.local",
         )
+        item_events.labels(event="on_hold", actor="").inc()
         return hold
 
     async def get_contact(self, item_id: UUID, caller_id: UUID) -> SellerContact:
@@ -58,8 +60,10 @@ class HoldService:
         if caller_id not in (hold.held_by, item.seller_id):
             raise HTTPException(status_code=403, detail="Not the holder or seller")
 
+        actor = "buyer" if caller_id == hold.held_by else "seller"
         await self._holds.release(item_id)
         updated = await self._items.update_status(item_id, ItemStatus.available)
+        item_events.labels(event="hold_released", actor=actor).inc()
         return HoldReleaseResponse(item_id=item_id, status=updated.status)  # type: ignore[union-attr]
 
     async def confirm(self, item_id: UUID, confirmer_id: UUID) -> ConfirmResponse:
@@ -85,11 +89,13 @@ class HoldService:
             raise HTTPException(status_code=403, detail="Not the holder or seller")
 
         updated_hold = await self._holds.confirm(item_id, role)
+        item_events.labels(event="confirmed", actor=role).inc()
 
         final_status = ItemStatus.on_hold
         if updated_hold.buyer_confirmed and updated_hold.seller_confirmed:
             await self._items.update_status(item_id, ItemStatus.sold)
             final_status = ItemStatus.sold
+            item_events.labels(event="sold", actor="").inc()
 
         return ConfirmResponse(
             item_id=item_id,
