@@ -7,6 +7,9 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from app.api.v1 import health, holds, items
 from app.core.config import settings
 from app.core.database import engine
+from app.core.logging_config import setup_logging
+
+setup_logging()
 
 
 @asynccontextmanager

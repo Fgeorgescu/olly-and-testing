@@ -18,3 +18,8 @@ node_modules/
 # Local secrets / kubeconfig overrides
 *.local
 kubeconfig
+
+# Runtime logs (written by backend, scraped by Promtail)
+apps/backend/logs/
+apps/backend/.coverage
+apps/backend/coverage.xml

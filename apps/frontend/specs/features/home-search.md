@@ -113,7 +113,25 @@ Search params are derived from the URL query string (single source of truth). Co
 
 ---
 
-## 5. Out of Scope
+## 5. Observability
+
+### User Interactions to Track
+
+| Interaction | Suggested event name | Notes |
+|-------------|---------------------|-------|
+| Search query submitted | `search_query_submitted` | Include `has_query`, `has_category_filter`, `has_tag_filter` |
+| Category filter applied | `search_category_filter_applied` | Include `category` value |
+| Tag filter applied | `search_tag_filter_applied` | Include `tags` values |
+| Pagination — next/prev | `search_page_changed` | Include `direction: next\|prev` and `page` number |
+| Item card clicked | `search_item_clicked` | Include `item_id` and `item_status` |
+
+### Error Monitoring
+
+- API errors (5xx) on the search fetch should be forwarded to the error tracker with the query params used.
+
+---
+
+## 6. Out of Scope
 
 - Relevance-ranked results (initial sort is newest first)
 - Infinite scroll (pagination controls only for now)
@@ -122,7 +140,7 @@ Search params are derived from the URL query string (single source of truth). Co
 
 ---
 
-## 6. Open Questions
+## 7. Open Questions
 
 | # | Question | Owner | Resolution |
 |---|----------|-------|------------|

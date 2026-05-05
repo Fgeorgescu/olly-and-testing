@@ -1,71 +1,80 @@
 # Observability
 
-Metrics and dashboards powered by [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), which bundles Prometheus, Grafana, Alertmanager, and kube-state-metrics into a single Helm release.
+Local observability stack for the Integrador platform, running entirely in Docker Compose. No Kubernetes required.
 
-## Installed Components
+## Components
 
-| Component | Purpose | Default port |
-|-----------|---------|-------------|
-| Prometheus | Metrics storage and querying | 9090 |
-| Grafana | Dashboards and visualization | 3000 |
-| Alertmanager | Alert routing | 9093 |
-| kube-state-metrics | Kubernetes object metrics | — |
+| Component | Purpose | Port |
+|-----------|---------|------|
+| Prometheus | Metrics collection and querying | 9090 |
+| Loki | Log aggregation | 3100 |
+| Promtail | Log shipper (scrapes `apps/backend/logs/app.log`) | — |
+| Grafana | Dashboards and visualization | 3001 |
 
-Installed in the `monitoring` namespace via `make setup`.
-
-## Accessing Locally
+## Quick Start
 
 ```bash
-# Grafana (admin / admin)
-kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+# Start the full stack (Prometheus + Loki + Promtail + Grafana)
+make obs-up
 
-# Prometheus
-kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
+# Stop
+make obs-down
+```
 
-# Alertmanager
-kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-alertmanager 9093:9093
+Grafana is available at **http://localhost:3001** with credentials `admin / admin`.
+
+## Using an Existing Prometheus
+
+If you already have a Prometheus instance, set `PROMETHEUS_URL` — only Grafana and Loki will start:
+
+```bash
+PROMETHEUS_URL=http://my-prometheus:9090 make obs-up
 ```
 
 ## How Metrics Are Scraped
 
-Application pods are scraped automatically via pod annotations:
+Prometheus scrapes the backend's `/metrics` endpoint directly on the host:
 
 ```yaml
-annotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/path: "/metrics"
-  prometheus.io/port: "8000"
+# observability/prometheus.yml
+scrape_configs:
+  - job_name: "integrador-backend"
+    static_configs:
+      - targets: ["host.docker.internal:8000"]
 ```
 
-The backend exposes these annotations. Any new service that adds them will be picked up without additional Prometheus config.
+The backend must be started with `--host 0.0.0.0` (the default via `make backend-run`) so it is reachable from Docker containers via the bridge gateway.
 
-## Adding a Custom Dashboard
+## How Logs Are Shipped
 
-1. Build and export the dashboard JSON from the Grafana UI
-2. Save it to `observability/grafana/dashboards/<name>.json`
-3. Ensure `observability/grafana/provisioning/` contains a datasource/dashboard provisioning config pointing at that directory
-4. The provisioning config is mounted into the Grafana pod via a ConfigMap (to be wired up in `infra/k8s`)
+The backend writes structured JSON logs to `apps/backend/logs/app.log`. Promtail mounts that directory and ships each line to Loki. The JSON fields `level` and `event` are promoted to Loki labels for efficient filtering.
 
-## Adding Alert Rules
-
-1. Create a `PrometheusRule` manifest in `observability/prometheus/rules/<name>.yaml`
-2. Apply it: `kubectl apply -f observability/prometheus/rules/<name>.yaml`
-
-Example rule structure:
-
-```yaml
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
-metadata:
-  name: backend-alerts
-  namespace: monitoring
-spec:
-  groups:
-  - name: backend
-    rules:
-    - alert: BackendDown
-      expr: up{job="backend"} == 0
-      for: 1m
-      annotations:
-        summary: "Backend is down"
 ```
+backend → logs/app.log → Promtail → Loki → Grafana
+```
+
+## Dashboards
+
+Dashboards are provisioned automatically from `grafana/dashboards/`. No manual import needed.
+
+| Dashboard | UID | Description |
+|-----------|-----|-------------|
+| Item Lifecycle Events | `integrador-item-lifecycle` | Prometheus counters (created, deleted, on_hold, sold) + event rate time series + Loki log panel |
+
+## Adding a Dashboard
+
+1. Build it in the Grafana UI
+2. Export as JSON (`Share → Export → Save to file`)
+3. Save to `grafana/dashboards/<name>.json`
+4. Restart Grafana (`docker restart observability_grafana_1`) — it reloads every 30 s automatically
+
+## Datasources
+
+Provisioned from `grafana/provisioning/datasources/`:
+
+| Datasource | UID | URL |
+|------------|-----|-----|
+| Prometheus | `integrador-prometheus` | `${PROMETHEUS_URL}` (default: `http://prometheus:9090`) |
+| Loki | `integrador-loki` | `http://loki:3100` |
+
+Dashboard JSON files must reference these UIDs exactly.

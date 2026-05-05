@@ -1,64 +1,72 @@
 # Integrador
 
-A monorepo that integrates multiple software development projects under a shared local Kubernetes environment with full observability, performance testing, and chaos engineering.
+A full-stack marketplace monorepo with a FastAPI backend, Next.js frontend, and a local observability stack (Prometheus + Loki + Grafana).
 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                      Local kind cluster                      │
-│                                                              │
-│   ┌────────────┐   HTTP    ┌────────────┐                   │
-│   │  Frontend  │ ────────▶ │  Backend   │                   │
-│   │  (Next.js) │           │  (FastAPI) │                   │
-│   └────────────┘           └─────┬──────┘                   │
-│                                  │ /metrics                  │
-│                           ┌──────▼──────────────────────┐   │
-│                           │  Prometheus  │    Grafana    │   │
-│                           └─────────────┴───────────────┘   │
-│                                                              │
-│   ┌─────────────────┐     ┌────────────────────────────┐    │
-│   │   k6 (perf)     │     │  LitmusChaos (chaos)       │    │
-│   └─────────────────┘     └────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        Local dev environment                    │
+│                                                                 │
+│   ┌────────────┐   HTTP    ┌─────────────┐   SQL   ┌────────┐  │
+│   │  Frontend  │ ────────▶ │   Backend   │ ──────▶ │  PG   │  │
+│   │  (Next.js) │           │  (FastAPI)  │         │  DB   │  │
+│   │  :3000     │           │  :8000      │         └────────┘  │
+│   └────────────┘           └──────┬──────┘                     │
+│                                   │ /metrics + logs/app.log    │
+│                 ┌─────────────────┼──────────────────────┐     │
+│                 │   Observability │ stack                 │     │
+│                 │                 ▼                       │     │
+│                 │  ┌──────────┐  ┌───────┐  ┌─────────┐  │     │
+│                 │  │Prometheus│  │ Loki  │  │ Grafana │  │     │
+│                 │  │  :9090   │  │ :3100 │  │  :3001  │  │     │
+│                 │  └──────────┘  └───┬───┘  └─────────┘  │     │
+│                 │                    │                     │     │
+│                 │             ┌──────┘                     │     │
+│                 │         ┌───▼────┐                       │     │
+│                 │         │Promtail│ (scrapes logs/)       │     │
+│                 │         └────────┘                       │     │
+│                 └─────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Prerequisites
 
-| Tool | Purpose | Install |
-|------|---------|---------|
-| [Docker](https://docs.docker.com/get-docker/) | Container runtime | Required |
-| [kind](https://kind.sigs.k8s.io/docs/user/quick-start/) | Local Kubernetes cluster | `brew install kind` |
-| [kubectl](https://kubernetes.io/docs/tasks/tools/) | Kubernetes CLI | `brew install kubectl` |
-| [Helm](https://helm.sh/docs/intro/install/) | Package manager for k8s | `brew install helm` |
-| [Skaffold](https://skaffold.dev/docs/install/) | Local dev loop | `brew install skaffold` |
-| Python 3.11+ | Backend runtime | `brew install python@3.11` |
+| Tool | Purpose |
+|------|---------|
+| [Docker](https://docs.docker.com/get-docker/) + docker-compose | Container runtime |
+| [Python 3.11+](https://www.python.org/) + [uv](https://github.com/astral-sh/uv) | Backend runtime |
+| [Node.js 18+](https://nodejs.org/) | Frontend runtime |
 
 ## Quick Start
 
 ```bash
-# 1. Bootstrap the local cluster and install the observability stack
+# Start everything (DB, observability, backend, frontend)
 make setup
 
-# 2. Start the dev loop — builds images and deploys to kind on file change
-make dev
-
-# 3. Access services
-kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80        # Grafana
-kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090  # Prometheus
-kubectl port-forward svc/backend 8000:8000                               # Backend API
+# Stop everything
+make teardown
 ```
+
+That's it. `make setup` installs dependencies, starts all services, waits for health checks, and prints the URLs.
+
+## URLs
+
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| Frontend | http://localhost:3000 | — |
+| Backend API | http://localhost:8000/docs | — |
+| Grafana | http://localhost:3001 | admin / admin |
+| Prometheus | http://localhost:9090 | — |
+| Loki | http://localhost:3100 | — |
 
 ## Components
 
 | Component | Description | README |
 |-----------|-------------|--------|
-| Backend | FastAPI REST API, metrics, health checks | [apps/backend/README.md](apps/backend/README.md) |
-| Frontend | Web UI (Next.js) | [apps/frontend/README.md](apps/frontend/README.md) |
-| Kubernetes | Kustomize manifests + Skaffold dev loop | [infra/k8s/README.md](infra/k8s/README.md) |
-| Observability | Prometheus + Grafana dashboards and alerts | [observability/README.md](observability/README.md) |
-| Performance testing | k6 load and smoke tests | [testing/performance/README.md](testing/performance/README.md) |
-| Chaos testing | LitmusChaos experiments | [testing/chaos/README.md](testing/chaos/README.md) |
+| Backend | FastAPI REST API with Prometheus metrics and structured logging | [apps/backend/README.md](apps/backend/README.md) |
+| Frontend | Next.js marketplace UI | [apps/frontend/README.md](apps/frontend/README.md) |
+| Observability | Prometheus + Loki + Grafana local stack | [observability/README.md](observability/README.md) |
 
 ## Repository Structure
 
@@ -66,32 +74,54 @@ kubectl port-forward svc/backend 8000:8000                               # Backe
 integrador/
 ├── apps/
 │   ├── backend/        # FastAPI service
-│   └── frontend/       # Next.js app (planned)
-├── infra/
-│   ├── k8s/            # Kustomize manifests
-│   └── helm/           # Third-party Helm values
+│   └── frontend/       # Next.js app
 ├── observability/
-│   ├── prometheus/     # Alerting rules
-│   └── grafana/        # Dashboard JSON + provisioning
-├── testing/
-│   ├── performance/    # k6 scripts
-│   └── chaos/          # LitmusChaos experiments
-├── scripts/            # setup.sh / teardown.sh
+│   ├── docker-compose.yml          # Prometheus, Loki, Promtail, Grafana
+│   ├── prometheus.yml              # Scrape config
+│   ├── loki/                       # Loki config
+│   ├── promtail/                   # Promtail config
+│   └── grafana/
+│       ├── dashboards/             # Dashboard JSON files
+│       └── provisioning/           # Auto-provisioned datasources + dashboards
+├── infra/k8s/          # Kustomize manifests (Kubernetes deployment)
+├── scripts/
+│   ├── setup.sh        # Start all local services
+│   └── teardown.sh     # Stop all local services
 ├── docs/adr/           # Architecture Decision Records
-├── skaffold.yaml
 └── Makefile
 ```
 
 ## Makefile Reference
 
 ```bash
-make setup          # Create kind cluster + install observability stack
-make dev            # Skaffold watch loop (build + deploy on change)
-make teardown       # Destroy the kind cluster
-make backend-test   # Run backend tests
-make backend-lint   # Lint backend code
+make setup              # Start all local services
+make teardown           # Stop all local services
+
+make backend-install    # Install backend Python dependencies
+make backend-run        # Run backend with hot-reload (port 8000)
+make backend-test       # Run all backend tests
+make backend-test-unit  # Run unit tests only (no Docker required)
+make backend-lint       # Lint and format-check backend
+
+make db-up              # Start PostgreSQL only
+make db-down            # Stop PostgreSQL
+
+make obs-up             # Start observability stack only
+make obs-down           # Stop observability stack
+```
+
+Set `PROMETHEUS_URL` to use an existing Prometheus instance — only Grafana and Loki will start:
+
+```bash
+PROMETHEUS_URL=http://my-prometheus:9090 make obs-up
 ```
 
 ## Architecture Decisions
 
 Design decisions are documented as ADRs in [`docs/adr/`](docs/adr/).
+
+| ADR | Decision |
+|-----|----------|
+| [001](docs/adr/001-backend-language.md) | Backend language: FastAPI (Python) |
+| [002](docs/adr/002-persistence-layer.md) | Persistence: PostgreSQL + SQLAlchemy async + Alembic |
+| [003](docs/adr/003-testing-strategy.md) | Testing: unit / integration / e2e tiers with repository pattern |

@@ -119,15 +119,32 @@ class HoldReleaseResponse(BaseModel):
   - `409` — item already `on_hold` or `sold` (on `POST /hold`)
   - `409` — caller already confirmed (on `POST /confirm`)
   - `403` — unauthorized caller
-- **Observability**: emit the following counters:
-  - `item_hold_total` — holds placed
-  - `item_hold_release_total` labeled `released_by: buyer|seller`
-  - `item_confirm_total` labeled `confirmed_by: buyer|seller`
-  - `item_sold_total` — items reaching `sold` via dual confirmation
+- **Observability**: see Observability section below.
 
 ---
 
-## 4. Out of Scope
+## 4. Observability
+
+### Metrics
+
+| Metric | Type | Labels | Emitted when |
+|--------|------|--------|--------------|
+| `item_events_total` | Counter | `event: on_hold` | `POST /api/v1/items/{id}/hold` succeeds |
+| `item_events_total` | Counter | `event: hold_released`, `released_by: buyer\|seller` | `DELETE /api/v1/items/{id}/hold` succeeds |
+| `item_events_total` | Counter | `event: confirmed`, `confirmed_by: buyer\|seller` | `POST /api/v1/items/{id}/confirm` records a confirmation |
+| `item_events_total` | Counter | `event: sold` | Both parties confirm; item transitions to `sold` |
+
+### Dashboards
+
+- **Item Lifecycle Events** — panels for hold rate, release rate, and sold rate over time.
+
+### Alerts
+
+- Alert if `rate(item_events_total{event="sold"}[1h]) == 0` for an extended period during business hours (may indicate the confirmation flow is broken).
+
+---
+
+## 5. Out of Scope
 
 - Automatic hold expiry (e.g., release after 48 h with no confirmation)
 - In-platform messaging between buyer and seller
@@ -137,7 +154,7 @@ class HoldReleaseResponse(BaseModel):
 
 ---
 
-## 5. Open Questions
+## 6. Open Questions
 
 | # | Question | Owner | Resolution |
 |---|----------|-------|------------|

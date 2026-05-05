@@ -122,13 +122,31 @@ class ItemListResponse(BaseModel):
 - **Flexibility**: zero search logic in the route layer; all algorithm details are inside the active `SearchBackend` implementation.
 - **Performance**: < 200 ms p99 for up to 10 k listings on `SimpleSearchBackend`; add DB indexes on `status`, `category`, `created_at`.
 - **Pagination safety**: `limit` is capped at 100 server-side regardless of the client request; prevents accidental full-table scans.
-- **Observability**: emit `item_search_total` counter labeled with `backend` (active backend name), `has_query` (bool), `has_filters` (bool). Enables Grafana comparison between backends.
+- **Observability**: see Observability section below.
 - **Error handling**:
   - `422` if `page < 1`, `limit < 1`, or `limit > 100`
 
 ---
 
-## 4. Out of Scope
+## 4. Observability
+
+### Metrics
+
+| Metric | Type | Labels | Emitted when |
+|--------|------|--------|--------------|
+| `item_search_total` | Counter | `backend: simple\|fulltext\|external`, `has_query: true\|false`, `has_filters: true\|false` | Each `GET /api/v1/items` request completes |
+
+### Dashboards
+
+- **Item Lifecycle Events** — panel showing search request rate and backend distribution.
+
+### Alerts
+
+- No alerts defined at this stage. Consider alerting on p99 latency if a full-text or external backend is introduced.
+
+---
+
+## 5. Out of Scope
 
 - Relevance ranking / scoring (initial backend returns newest-first regardless of query)
 - Geo-based or distance filtering
@@ -138,7 +156,7 @@ class ItemListResponse(BaseModel):
 
 ---
 
-## 5. Open Questions
+## 6. Open Questions
 
 | # | Question | Owner | Resolution |
 |---|----------|-------|------------|

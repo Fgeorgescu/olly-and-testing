@@ -55,7 +55,6 @@ export interface ItemCreate {
   description: string;
   category: ItemCategory;
   tags: ItemTag[];
-  seller_id: string;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
