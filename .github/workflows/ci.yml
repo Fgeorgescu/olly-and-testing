@@ -10,6 +10,8 @@ jobs:
   backend-unit:
     name: Backend — Unit
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     defaults:
       run:
         working-directory: apps/backend
@@ -39,6 +41,13 @@ jobs:
         with:
           name: backend-coverage
           path: apps/backend/coverage.xml
+
+      - name: Post coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        if: github.event_name == 'pull_request'
+        with:
+          pytest-xml-coverage-path: apps/backend/coverage.xml
+          title: Backend unit coverage
 
   backend-integration:
     name: Backend — Integration
