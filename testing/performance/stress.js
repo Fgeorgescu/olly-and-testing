@@ -10,13 +10,13 @@ import {
 
 export const options = {
   stages: [
-    { duration: "1m",  target: 50  },  // ramp to normal-ish
-    { duration: "2m",  target: 50  },  // sustain
-    { duration: "1m",  target: 100 },  // push harder
-    { duration: "2m",  target: 100 },  // sustain stress level
-    { duration: "1m",  target: 150 },  // spike
-    { duration: "1m",  target: 150 },  // hold the spike
-    { duration: "2m",  target: 0   },  // recovery
+    { duration: "1m",  target: 500  },  // ramp to normal-ish
+    { duration: "2m",  target: 500  },  // sustain
+    { duration: "1m",  target: 1000 },  // push harder
+    { duration: "2m",  target: 1000 },  // sustain stress level
+    { duration: "1m",  target: 1500 },  // spike
+    { duration: "1m",  target: 1500 },  // hold the spike
+    { duration: "2m",  target: 0    },  // recovery
   ],
   thresholds: {
     // Looser than load — we expect degradation, we want to see where it breaks

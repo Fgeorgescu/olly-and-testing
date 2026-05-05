@@ -53,15 +53,15 @@ obs-down: ## Stop observability stack
 
 perf-smoke: ## Run smoke test and push results to Prometheus (requires k6 + services running)
 	K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
-	K6_PROMETHEUS_RW_TREND_STATS=p50,p95,p99 \
+	K6_PROMETHEUS_RW_TREND_STATS="p(50),p(95),p(99)" \
 	k6 run --out experimental-prometheus-rw testing/performance/smoke.js
 
 perf-load: ## Run load test and push results to Prometheus
 	K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
-	K6_PROMETHEUS_RW_TREND_STATS=p50,p95,p99 \
+	K6_PROMETHEUS_RW_TREND_STATS="p(50),p(95),p(99)" \
 	k6 run --out experimental-prometheus-rw testing/performance/load.js
 
 perf-stress: ## Run stress test and push results to Prometheus
 	K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
-	K6_PROMETHEUS_RW_TREND_STATS=p50,p95,p99 \
+	K6_PROMETHEUS_RW_TREND_STATS="p(50),p(95),p(99)" \
 	k6 run --out experimental-prometheus-rw testing/performance/stress.js
