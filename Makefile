@@ -1,4 +1,4 @@
-.PHONY: help setup teardown dev backend-install backend-run backend-test backend-test-unit backend-test-int backend-test-e2e backend-lint db-up db-down obs-up obs-down perf-smoke perf-load perf-stress
+.PHONY: help setup teardown dev k8s-setup k8s-teardown backend-install backend-run backend-test backend-test-unit backend-test-int backend-test-e2e backend-lint db-up db-down obs-up obs-down perf-smoke perf-load perf-stress
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -8,6 +8,12 @@ setup: ## Start all local services (DB, observability, backend, frontend)
 
 teardown: ## Stop all local services
 	./scripts/teardown.sh
+
+k8s-setup: ## Create kind cluster + install Prometheus & ArgoCD via Helm (for Kubernetes practice)
+	./scripts/k8s-setup.sh
+
+k8s-teardown: ## Destroy the kind cluster
+	./scripts/k8s-teardown.sh
 
 dev: ## Start Skaffold watch loop (build + deploy on change)
 	skaffold dev --port-forward
